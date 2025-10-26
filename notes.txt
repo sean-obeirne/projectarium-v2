@@ -48,3 +48,42 @@ sample data:
             VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', default_projects)
         self.conn.commit()
+
+
+Go Project Structure:
+======================
+projectarium-v2/
+├── cmd/
+│   └── api/
+│       └── main.go              # Application entry point
+├── internal/
+│   ├── database/
+│   │   ├── db.go                # Database connection setup
+│   │   └── migrations/          # Optional: migration files
+│   ├── handlers/
+│   │   ├── projects.go          # Project CRUD handlers
+│   │   └── todos.go             # Todo CRUD handlers
+│   ├── models/
+│   │   ├── project.go           # Project struct & methods
+│   │   └── todo.go              # Todo struct & methods
+│   ├── middleware/
+│   │   ├── auth.go              # Authentication middleware
+│   │   ├── cors.go              # CORS middleware
+│   │   └── logger.go            # Request logging
+│   └── repository/
+│       ├── project_repo.go      # Project database queries
+│       └── todo_repo.go         # Todo database queries
+├── pkg/
+│   └── config/
+│       └── config.go            # Configuration loading
+├── scripts/
+│   ├── setup_database.sh        # Database setup script
+│   ├── schema.sql               # Database schema
+│   └── seed_data.sql            # Seed data
+├── .env.example
+├── .gitignore
+├── go.mod
+├── go.sum
+├── LICENSE
+├── README.md
+└── README_DATABASE.md
