@@ -6,23 +6,65 @@ Multi-device project and todo tracker with PostgreSQL backend and Go REST API.
 
 ## Quick Start
 
-1. **Setup Database**
+### First Time Setup
+
+1. **Install Development Tools**
    ```bash
-   cd scripts
-   ./setup_database.sh
+   make install-tools    # Installs golangci-lint, air
+   make install-hooks    # Sets up git pre-commit hooks
    ```
 
-2. **Install Dependencies**
+2. **Setup Database**
    ```bash
-   go mod tidy
+   make db-setup
    ```
 
 3. **Run the API**
    ```bash
-   go run cmd/api/main.go
+   make dev              # Run with hot reload (recommended)
+   # OR
+   make run              # Run without hot reload
    ```
 
 The API will be available at `http://localhost:8080`
+
+### Development Workflow
+
+```bash
+make dev              # Start development server with hot reload
+make check            # Run all checks (fmt, vet, lint, test)
+make build            # Build production binary
+make clean            # Clean build artifacts
+```
+
+### Available Make Commands
+
+```bash
+make help             # Show all available commands
+make build            # Build the application
+make run              # Run the application
+make dev              # Run with air (hot reload)
+make test             # Run tests
+make fmt              # Format code
+make vet              # Run go vet
+make lint             # Run golangci-lint
+make check            # Run all checks (runs automatically on commit)
+make clean            # Clean build artifacts
+make install-hooks    # Install git pre-commit hooks
+make install-tools    # Install development tools
+make db-setup         # Setup database
+```
+
+### Pre-Commit Hooks
+
+The git pre-commit hook automatically runs on every commit:
+- `go mod tidy` - Clean up dependencies
+- `go fmt` - Format code
+- `go vet` - Check for common errors
+- `go test` - Run tests
+- `golangci-lint` - Run comprehensive linter
+
+If any check fails, the commit is blocked until you fix the issues.
 
 ## API Endpoints
 
