@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE TABLE IF NOT EXISTS todo (
     id SERIAL PRIMARY KEY,
     description TEXT NOT NULL UNIQUE,
-    priority TEXT,
+    priority INTEGER DEFAULT 0,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     project_id INTEGER,
     FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
