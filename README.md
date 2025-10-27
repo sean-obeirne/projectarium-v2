@@ -26,7 +26,7 @@ Multi-device project and todo tracker with PostgreSQL backend and Go REST API.
    make run              # Run without hot reload
    ```
 
-The API will be available at `http://localhost:8080`
+The API will be available at `http://localhost:8888`
 
 ### Development Workflow
 

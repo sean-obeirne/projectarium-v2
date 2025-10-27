@@ -1,4 +1,4 @@
-.PHONY: help build run test clean fmt vet lint install-hooks install-tools db-setup
+.PHONY: help build run test clean fmt vet lint install-hooks install-tools db-setup docker-up docker-down docker-logs docker-reset service-install service-start service-stop service-status
 
 # Default target
 help:
@@ -15,6 +15,18 @@ help:
 	@echo "  make install-hooks  - Install git pre-commit hooks"
 	@echo "  make install-tools  - Install development tools"
 	@echo "  make db-setup       - Setup database"
+	@echo ""
+	@echo "Docker commands:"
+	@echo "  make docker-up      - Start API and database in Docker"
+	@echo "  make docker-down    - Stop Docker containers"
+	@echo "  make docker-logs    - View Docker logs"
+	@echo "  make docker-reset   - Wipe database and restart"
+	@echo ""
+	@echo "Systemd service commands:"
+	@echo "  make service-install - Install systemd service"
+	@echo "  make service-start   - Start the service"
+	@echo "  make service-stop    - Stop the service"
+	@echo "  make service-status  - Check service status"
 
 # Build the application
 build:
@@ -101,3 +113,46 @@ install-tools:
 db-setup:
 	@echo "🗄️  Setting up database..."
 	cd scripts && ./setup_database.sh
+
+# Docker commands
+docker-up:
+	@echo "🐳 Starting Docker containers..."
+	docker compose up -d
+	@echo "✅ API running on http://localhost:8888"
+
+docker-down:
+	@echo "🛑 Stopping Docker containers..."
+	docker compose down
+
+docker-logs:
+	@echo "📋 Showing Docker logs..."
+	docker compose logs -f api
+
+docker-reset:
+	@echo "⚠️  Wiping database and restarting..."
+	docker compose down -v
+	docker compose up -d
+	@echo "✅ Reset complete!"
+
+# Systemd service commands
+service-install:
+	@echo "🔧 Installing systemd service..."
+	@mkdir -p ~/.config/systemd/user
+	@cp projectarium.service ~/.config/systemd/user/
+	@systemctl --user daemon-reload
+	@systemctl --user enable projectarium
+	@echo "✅ Service installed! Use 'make service-start' to start it."
+	@echo "💡 Run 'loginctl enable-linger $$USER' to start on boot."
+
+service-start:
+	@echo "▶️  Starting service..."
+	@systemctl --user start projectarium
+	@echo "✅ Service started!"
+
+service-stop:
+	@echo "⏸️  Stopping service..."
+	@systemctl --user stop projectarium
+	@echo "✅ Service stopped!"
+
+service-status:
+	@systemctl --user status projectarium

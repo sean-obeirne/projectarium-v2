@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: projectarium-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-projectarium}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-projectarium}
+      POSTGRES_DB: ${DB_NAME:-projectarium}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./scripts/seed_data.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-projectarium}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: projectarium-api
+    ports:
+      - "8888:8888"
+    environment:
+      DB_USER: ${DB_USER:-projectarium}
+      DB_PASSWORD: ${DB_PASSWORD:-projectarium}
+      DB_NAME: ${DB_NAME:-projectarium}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      PORT: 8888
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
