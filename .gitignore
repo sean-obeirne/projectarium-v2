@@ -10,7 +10,7 @@
 
 # Built executables
 bin/
-api
+pj
 projectarium-api
 
 # Test binary, built with `go test -c`

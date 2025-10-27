@@ -12,13 +12,21 @@ type Config struct {
 
 func Load() *Config {
 	dbUser := getEnv("DB_USER", os.Getenv("USER"))
+	dbPassword := getEnv("DB_PASSWORD", "")
 	dbName := getEnv("DB_NAME", "projectarium")
 	dbHost := getEnv("DB_HOST", "localhost")
 	dbPort := getEnv("DB_PORT", "5432")
 
+	var dbURL string
+	if dbPassword != "" {
+		dbURL = fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName)
+	} else {
+		dbURL = fmt.Sprintf("postgresql://%s@%s:%s/%s?sslmode=disable", dbUser, dbHost, dbPort, dbName)
+	}
+
 	return &Config{
-		DatabaseURL: fmt.Sprintf("postgresql://%s@%s:%s/%s?sslmode=disable", dbUser, dbHost, dbPort, dbName),
-		Port:        getEnv("PORT", "8080"),
+		DatabaseURL: dbURL,
+		Port:        getEnv("PORT", "8888"),
 	}
 }
 
