@@ -1,0 +1,94 @@
+#!/usr/bin/env fish
+
+set PROJ_DIR ~/code/projectariums/projectarium-v2
+
+function show_help
+    echo "pj - Projectarium CLI"
+    echo ""
+    echo "Usage: pj [command]"
+    echo ""
+    echo "Commands:"
+    echo "  up, start       Start the API and database"
+    echo "  down, stop      Stop all containers"
+    echo "  logs, log       View API logs"
+    echo "  reset, wipe     Wipe database and restart"
+    echo "  status          Check service status"
+    echo "  health          Check if API is responding"
+    echo "  restart         Restart containers"
+    echo "  build           Rebuild Docker images"
+    echo "  help, --help    Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  pj up           # Start everything"
+    echo "  pj health       # Test API connection"
+    echo "  pj logs         # Watch logs"
+    echo "  pj reset        # Fresh start with clean database"
+end
+
+# Get command
+set cmd $argv[1]
+
+# Show help if no command or help requested
+if test -z "$cmd"; or test "$cmd" = "help"; or test "$cmd" = "--help"; or test "$cmd" = "-h"
+    show_help
+    exit 0
+end
+
+# Execute commands
+switch $cmd
+    case up start
+        echo "🚀 Starting Projectarium API..."
+        cd $PROJ_DIR && make docker-up
+        
+    case down stop
+        echo "🛑 Stopping Projectarium API..."
+        cd $PROJ_DIR && make docker-down
+        
+    case logs log
+        echo "📋 Showing logs (Ctrl+C to exit)..."
+        cd $PROJ_DIR && make docker-logs
+        
+    case reset wipe
+        echo "⚠️  This will wipe all database data!"
+        read -P "Continue? [y/N] " -l confirm
+        if test "$confirm" = "y"; or test "$confirm" = "Y"
+            cd $PROJ_DIR && make docker-reset
+        else
+            echo "Cancelled."
+        end
+        
+    case restart
+        echo "🔄 Restarting containers..."
+        cd $PROJ_DIR && docker compose restart
+        echo "✅ Restarted!"
+        
+    case build
+        echo "🏗️  Rebuilding Docker images..."
+        cd $PROJ_DIR && docker compose build
+        echo "✅ Build complete!"
+        
+    case status
+        echo "📊 Service status:"
+        cd $PROJ_DIR && docker compose ps
+        
+    case health
+        echo "🔍 Checking API health..."
+        set response (curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health 2>/dev/null)
+        
+        if test "$response" = "200"
+            echo "✅ API is healthy and responding!"
+            echo "📡 http://localhost:8888"
+        else if test "$response" = "000"
+            echo "❌ API is not reachable"
+            echo "   Try: pj status"
+        else
+            echo "⚠️  API responded with HTTP $response"
+            echo "   Try: pj logs"
+        end
+        
+    case '*'
+        echo "Error: Unknown command '$cmd'"
+        echo ""
+        show_help
+        exit 1
+end
