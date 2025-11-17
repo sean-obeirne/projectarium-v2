@@ -106,6 +106,25 @@ func (h *Handler) DeleteProject(w http.ResponseWriter, r *http.Request) {
 
 // GetTodos returns all todos
 func (h *Handler) GetTodos(w http.ResponseWriter, r *http.Request) {
+	// Check if filtering by project
+	projectIDStr := r.URL.Query().Get("project_id")
+	if projectIDStr != "" {
+		projectID, err := strconv.Atoi(projectIDStr)
+		if err != nil {
+			http.Error(w, "Invalid project_id", http.StatusBadRequest)
+			return
+		}
+		
+		todos, err := h.todoRepo.GetByProjectID(projectID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		respondJSON(w, http.StatusOK, todos)
+		return
+	}
+	
+	// Return all todos
 	todos, err := h.todoRepo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

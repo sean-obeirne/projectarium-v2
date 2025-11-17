@@ -72,3 +72,27 @@ func (r *TodoRepository) Delete(id int) error {
 	_, err := r.db.Exec("UPDATE todo SET deleted = TRUE WHERE id = $1", id)
 	return err
 }
+
+func (r *TodoRepository) GetByProjectID(projectID int) ([]models.Todo, error) {
+	rows, err := r.db.Query(`
+		SELECT id, description, priority, deleted, project_id
+		FROM todo
+		WHERE project_id = $1 AND deleted = FALSE
+		ORDER BY priority DESC, id
+	`, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos []models.Todo
+	for rows.Next() {
+		var t models.Todo
+		err := rows.Scan(&t.ID, &t.Description, &t.Priority, &t.Deleted, &t.ProjectID)
+		if err != nil {
+			return nil, err
+		}
+		todos = append(todos, t)
+	}
+	return todos, rows.Err()
+}
