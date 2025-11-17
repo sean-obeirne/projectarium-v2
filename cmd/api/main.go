@@ -40,6 +40,8 @@ func main() {
 	mux.HandleFunc("POST /api/projects", h.CreateProject)
 	mux.HandleFunc("PUT /api/projects/{id}", h.UpdateProject)
 	mux.HandleFunc("DELETE /api/projects/{id}", h.DeleteProject)
+	mux.HandleFunc("PATCH /api/projects/{id}/status", h.UpdateProjectStatus)
+	mux.HandleFunc("PATCH /api/projects/{id}/priority", h.UpdateProjectPriority)
 
 	// Todo routes
 	mux.HandleFunc("GET /api/todos", h.GetTodos)
