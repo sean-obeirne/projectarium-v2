@@ -114,7 +114,7 @@ func (h *Handler) GetTodos(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid project_id", http.StatusBadRequest)
 			return
 		}
-		
+
 		todos, err := h.todoRepo.GetByProjectID(projectID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -123,7 +123,7 @@ func (h *Handler) GetTodos(w http.ResponseWriter, r *http.Request) {
 		respondJSON(w, http.StatusOK, todos)
 		return
 	}
-	
+
 	// Return all todos
 	todos, err := h.todoRepo.GetAll()
 	if err != nil {
