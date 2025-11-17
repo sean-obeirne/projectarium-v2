@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS projects (
 -- Create the 'todo' table (if it doesn't exist)
 CREATE TABLE IF NOT EXISTS todo (
     id SERIAL PRIMARY KEY,
-    description TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL,
     priority INTEGER DEFAULT 0,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     project_id INTEGER,
