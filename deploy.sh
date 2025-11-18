@@ -46,7 +46,7 @@ if test "$TARGET" = "local"
     # Start containers
     echo "🐳 Starting Docker containers..."
     docker compose up -d
-    
+
     # Install CLI locally
     echo "🔧 Installing projectarium CLI..."
     mkdir -p ~/bin

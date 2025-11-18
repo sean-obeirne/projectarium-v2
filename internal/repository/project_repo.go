@@ -71,3 +71,31 @@ func (r *ProjectRepository) Delete(id int) error {
 	_, err := r.db.Exec("DELETE FROM projects WHERE id = $1", id)
 	return err
 }
+
+func (r *ProjectRepository) UpdateStatus(id int, status string) (*models.Project, error) {
+	var p models.Project
+	err := r.db.QueryRow(`
+		UPDATE projects
+		SET status = $1
+		WHERE id = $2
+		RETURNING id, name, description, path, file, priority, status, language
+	`, status, id).Scan(&p.ID, &p.Name, &p.Description, &p.Path, &p.File, &p.Priority, &p.Status, &p.Language)
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func (r *ProjectRepository) UpdatePriority(id int, priority int) (*models.Project, error) {
+	var p models.Project
+	err := r.db.QueryRow(`
+		UPDATE projects
+		SET priority = $1
+		WHERE id = $2
+		RETURNING id, name, description, path, file, priority, status, language
+	`, priority, id).Scan(&p.ID, &p.Name, &p.Description, &p.Path, &p.File, &p.Priority, &p.Status, &p.Language)
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}

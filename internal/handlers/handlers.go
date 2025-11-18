@@ -106,6 +106,25 @@ func (h *Handler) DeleteProject(w http.ResponseWriter, r *http.Request) {
 
 // GetTodos returns all todos
 func (h *Handler) GetTodos(w http.ResponseWriter, r *http.Request) {
+	// Check if filtering by project
+	projectIDStr := r.URL.Query().Get("project_id")
+	if projectIDStr != "" {
+		projectID, err := strconv.Atoi(projectIDStr)
+		if err != nil {
+			http.Error(w, "Invalid project_id", http.StatusBadRequest)
+			return
+		}
+
+		todos, err := h.todoRepo.GetByProjectID(projectID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		respondJSON(w, http.StatusOK, todos)
+		return
+	}
+
+	// Return all todos
 	todos, err := h.todoRepo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -184,6 +203,85 @@ func (h *Handler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// UpdateProjectStatus updates only the status of a project
+func (h *Handler) UpdateProjectStatus(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	var payload struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validate status
+	validStatuses := map[string]bool{
+		"ready":       true,
+		"in_progress": true,
+		"finished":    true,
+	}
+	if !validStatuses[payload.Status] {
+		http.Error(w, "Invalid status. Must be: ready, in_progress, or finished", http.StatusBadRequest)
+		return
+	}
+
+	project, err := h.projectRepo.UpdateStatus(id, payload.Status)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Project not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, project)
+}
+
+// UpdateProjectPriority updates only the priority of a project
+func (h *Handler) UpdateProjectPriority(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	var payload struct {
+		Priority int `json:"priority"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validate priority (must be between 0 and 3)
+	if payload.Priority < 0 {
+		http.Error(w, "Priority must be non-negative", http.StatusBadRequest)
+		return
+	}
+	if payload.Priority > 3 {
+		http.Error(w, "Priority cannot exceed 3", http.StatusBadRequest)
+		return
+	}
+
+	project, err := h.projectRepo.UpdatePriority(id, payload.Priority)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Project not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, project)
 }
 
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
